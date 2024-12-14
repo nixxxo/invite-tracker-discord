@@ -37,14 +37,42 @@ invite_tracker = load_invites()
 async def on_ready():
     print(f"Bot is ready as {bot.user}")
     await bot.sync_commands()
+    
     for guild in bot.guilds:
-        invite_tracker[str(guild.id)] = invite_tracker.get(str(guild.id), {})
-        invites = await guild.invites()
-        for invite in invites:
-            invite_tracker[str(guild.id)][invite.code] = {
-                "uses": invite.uses,
-                "creator": invite.inviter.id if invite.inviter else None,
-            }
+        # Initialize guild if not exists while preserving existing data
+        if str(guild.id) not in invite_tracker:
+            invite_tracker[str(guild.id)] = {}
+            
+        current_invites = await guild.invites()
+        
+        # Update only invite uses count and creator, preserve other data
+        for invite in current_invites:
+            if invite.code not in invite_tracker[str(guild.id)]:
+                # New invite found, initialize it
+                invite_tracker[str(guild.id)][invite.code] = {
+                    "uses": invite.uses,
+                    "creator": invite.inviter.id if invite.inviter else None,
+                    "invited_users": []
+                }
+            else:
+                # Update only the uses count, preserve invited_users
+                existing_data = invite_tracker[str(guild.id)][invite.code]
+                existing_data["uses"] = invite.uses
+                # Update creator only if it was None
+                if existing_data.get("creator") is None:
+                    existing_data["creator"] = invite.inviter.id if invite.inviter else None
+                # Ensure invited_users list exists
+                if "invited_users" not in existing_data:
+                    existing_data["invited_users"] = []
+        
+        # Remove invites that no longer exist while preserving data structure
+        stored_codes = set(invite_tracker[str(guild.id)].keys())
+        current_codes = {invite.code for invite in current_invites}
+        for removed_code in stored_codes - current_codes:
+            # Only remove if it has no invited users
+            if not invite_tracker[str(guild.id)][removed_code].get("invited_users"):
+                del invite_tracker[str(guild.id)][removed_code]
+        
         save_invites(invite_tracker)
 
 
