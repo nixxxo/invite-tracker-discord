@@ -37,14 +37,14 @@ invite_tracker = load_invites()
 async def on_ready():
     print(f"Bot is ready as {bot.user}")
     await bot.sync_commands()
-    
+
     for guild in bot.guilds:
         # Initialize guild if not exists while preserving existing data
         if str(guild.id) not in invite_tracker:
             invite_tracker[str(guild.id)] = {}
-            
+
         current_invites = await guild.invites()
-        
+
         # Update only invite uses count and creator, preserve other data
         for invite in current_invites:
             if invite.code not in invite_tracker[str(guild.id)]:
@@ -52,7 +52,7 @@ async def on_ready():
                 invite_tracker[str(guild.id)][invite.code] = {
                     "uses": invite.uses,
                     "creator": invite.inviter.id if invite.inviter else None,
-                    "invited_users": []
+                    "invited_users": [],
                 }
             else:
                 # Update only the uses count, preserve invited_users
@@ -60,11 +60,13 @@ async def on_ready():
                 existing_data["uses"] = invite.uses
                 # Update creator only if it was None
                 if existing_data.get("creator") is None:
-                    existing_data["creator"] = invite.inviter.id if invite.inviter else None
+                    existing_data["creator"] = (
+                        invite.inviter.id if invite.inviter else None
+                    )
                 # Ensure invited_users list exists
                 if "invited_users" not in existing_data:
                     existing_data["invited_users"] = []
-        
+
         # Remove invites that no longer exist while preserving data structure
         stored_codes = set(invite_tracker[str(guild.id)].keys())
         current_codes = {invite.code for invite in current_invites}
@@ -72,7 +74,7 @@ async def on_ready():
             # Only remove if it has no invited users
             if not invite_tracker[str(guild.id)][removed_code].get("invited_users"):
                 del invite_tracker[str(guild.id)][removed_code]
-        
+
         save_invites(invite_tracker)
 
 
@@ -197,39 +199,32 @@ async def on_member_join(member):
 
             save_invites(invite_tracker)
 
-            try:
-                inviter = guild.get_member(stored_invite["creator"])
-                welcome_embed = discord.Embed(
-                    title="👋 Welcome!",
-                    description=f"Welcome {member.mention} to the server!",
-                    color=discord.Color.green(),
-                )
-                welcome_embed.add_field(
-                    name="Invited By",
-                    value=inviter.mention if inviter else "Unknown",
-                    inline=True,
-                )
-                welcome_embed.set_thumbnail(
-                    url=(
-                        member.avatar.url
-                        if member.avatar
-                        else member.default_avatar.url
-                    )
-                )
+            # # Welcome message code commented out
+            # try:
+            #     inviter = guild.get_member(stored_invite["creator"])
+            #     welcome_embed = discord.Embed(
+            #         title="👋 Welcome!",
+            #         description=f"Welcome {member.mention} to the server!",
+            #         color=discord.Color.green()
+            #     )
+            #     welcome_embed.add_field(
+            #         name="Invited By",
+            #         value=inviter.mention if inviter else "Unknown",
+            #         inline=True
+            #     )
+            #     welcome_embed.set_thumbnail(
+            #         url=member.avatar.url if member.avatar else member.default_avatar.url
+            #     )
 
-                # Try to find system channel or first text channel
-                channel = guild.system_channel or next(
-                    (
-                        channel
-                        for channel in guild.text_channels
-                        if channel.permissions_for(guild.me).send_messages
-                    ),
-                    None,
-                )
-                if channel:
-                    await channel.send(embed=welcome_embed)
-            except:
-                pass
+            #     # Try to find system channel or first text channel
+            #     channel = guild.system_channel or next(
+            #         (channel for channel in guild.text_channels if channel.permissions_for(guild.me).send_messages),
+            #         None
+            #     )
+            #     if channel:
+            #         await channel.send(embed=welcome_embed)
+            # except:
+            #     pass
             break
 
 
