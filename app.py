@@ -198,33 +198,6 @@ async def on_member_join(member):
             )
 
             save_invites(invite_tracker)
-
-            # # Welcome message code commented out
-            # try:
-            #     inviter = guild.get_member(stored_invite["creator"])
-            #     welcome_embed = discord.Embed(
-            #         title="👋 Welcome!",
-            #         description=f"Welcome {member.mention} to the server!",
-            #         color=discord.Color.green()
-            #     )
-            #     welcome_embed.add_field(
-            #         name="Invited By",
-            #         value=inviter.mention if inviter else "Unknown",
-            #         inline=True
-            #     )
-            #     welcome_embed.set_thumbnail(
-            #         url=member.avatar.url if member.avatar else member.default_avatar.url
-            #     )
-
-            #     # Try to find system channel or first text channel
-            #     channel = guild.system_channel or next(
-            #         (channel for channel in guild.text_channels if channel.permissions_for(guild.me).send_messages),
-            #         None
-            #     )
-            #     if channel:
-            #         await channel.send(embed=welcome_embed)
-            # except:
-            #     pass
             break
 
 
