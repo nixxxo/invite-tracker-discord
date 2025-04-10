@@ -68,15 +68,3 @@ Once the bot is running, you can use the following commands in your Discord serv
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any enhancements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For any inquiries or further information, please contact me at [your_email@example.com].
-
----
-
-This README serves as a comprehensive guide to understanding and running the Discord Invite Tracker application. It highlights my skills in software development, systems architecture, and security best practices.
